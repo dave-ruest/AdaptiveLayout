@@ -22,6 +22,12 @@ import SwiftSyntaxMacros
 /// "tablet" amount of space. Add a half screen grid view beside your navigation
 /// stack if you like, it's the same amount of work as the system split view, and
 /// will give your app a unique look.
+///
+/// The macro also adds heightClass and dynamicTypeSize properties. Use heightClass
+/// to detect phone landscape orientation and maybe switch to an HStack from a
+/// VStack. Use dynamicTypeSize to detect the smaller and larger text sizes. Lower
+/// priority content such as additional images can be shown in smaller sizes and
+/// hidden in larger text sizes.
 public struct AdaptiveLayoutMacro: MemberMacro {
     public static func expansion(
       of node: AttributeSyntax,
@@ -32,12 +38,20 @@ public struct AdaptiveLayoutMacro: MemberMacro {
         // TODO: check swift ui import? check view conformance?
         return [
             """
-            /** The current horiztonal size class. Most phones have compact horiztonal
+            /** The current horizontal size class. Most phones have compact horizontal
             size, as well as iPad apps when in split view. When not in split view, iPad
-            apps have regulear width. Some larger phones also have regular width in
-            landscape orientation. Use this property in in your view when you will show
-            different views for regular and compact sizes. */
+            apps have regular width. Some larger phones also have regular width in
+            landscape orientation. Use this property to show different views for regular
+            and compact sizes. */
             @Environment(\\.horizontalSizeClass) private var widthClass
+            """,
+            """
+            /** The current vertical size class. Most phones have compact vertical
+            size when in landscape orientation. Use this property to show different
+            views for regular and compact sizes. One trick is to hide less important
+            content in compact height; another is to switch an hstack to a vstack
+            in compact height. */
+            @Environment(\\.verticalSizeClass) private var heightClass
             """,
             """
             /** When true, useTabletLayout indicates the screen has room for 2-3 phone
@@ -48,6 +62,13 @@ public struct AdaptiveLayoutMacro: MemberMacro {
                 if self.widthClass == .compact { return false }
                 return UIDevice.current.userInterfaceIdiom == .pad
             }
+            """,
+            """
+            /** The current dynamic text size. There is no way to show the same amount
+            of content at both the smallest and largest text sizes. You must scroll or
+            reduce content at the largest size. Use this property to hide lower priority
+            content at the higher type sizes. */
+            @Environment(\\.dynamicTypeSize) private var typeSize
             """
         ]
     }

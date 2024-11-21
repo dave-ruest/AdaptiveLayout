@@ -1,8 +1,67 @@
 # AdaptiveLayout
 
-The AdaptiveLayout package provides a single eponymous macro. Prepend the macro to any SwiftUI view and it will add a **useTabletLayout** derived property. Use **self.useTabletLayout** in an if to show a different view for the larger space available on tablet sized screens.
+The AdaptiveLayout package provides a single eponymous macro. Apply the macro to any SwiftUI view that must show different subviews for different size classes or dynamic type sizes. 
 
-## Instructions
+## Examples: heightClass and widthClass
+
+```
+    var body: some View {
+        let AStack = self.heightClass == .compact
+            ? AnyLayout(HStackLayout())
+            : AnyLayout(VStackLayout())
+        AStack { ... }
+    }
+```
+
+```
+    var body: some View {
+        Group { ... }                            
+        .frame(maxWidth: self.heightClass == .compact
+            ? 200 : .infinity)
+    }
+```
+
+The **heightClass** and **widthClass** properties are useful for phone landscape orientation. When your screen has roughly equal top and bottom areas in portrait, an easy solution is to put those side by side in landscape. It can be useful to "invent" such a division. Lists, for example, can look stretched in landscape. Moving buttons and other elements to the right can maintain list proportions.  
+
+## Examples: useTabletLayout
+```
+    var body: some View {
+        Text(self.title)
+            .lineLimit(self.useTabletLayout ? 3 : 2)
+    }
+```
+
+```
+    private var welcomeText: String {
+        if self.useTabletLayout {
+            return self.largeText
+        }
+        return self.normalText
+    }
+```
+
+The **useTabletLayout** property helps decide when to show additional content. On a tablet, you don't really need to worry about landscape orientation. SwiftUI layouts are so flexible and easy - and tablet portrait dimensions so similar to landscape - that the same layout will probably work. But! The tablet dimensions are much larger than the phone. A list that looks fine on phone portrait will look stretched and have a great deal of wasted space on tablet.
+
+So to use that space and save the user some taps, you can squeeze in another screen of content. Maybe use side-by-side navigation for tablets. Or show larger but lower priority content such as images in the larger format. 
+
+## Examples: dynamicTypeSize
+```
+    private var columnWidth: CGFloat {
+        if self.typeSize >= .accessibility3 {
+            return self.useTabletLayout ? 160.0 : 120.0
+        return self.useTabletLayout ? 100.0 : 60.0
+    }
+```
+
+```
+    private var searchTitle: String {
+        self.typeSize > .accessibility1 ? "Find" : "Search"
+    }
+```
+
+The **dynamicTypeSize** helps with the enormous difference in available space due to type size. The largest accessiblity sizes leave room for little more than a few characters on phone portrait. But the smallest accessbility sizes will squeeze a paragraph into a tiny corner of a tablet. I see *no way* to show the exact same content in all ranges. As with phone landscape and tablets, content must be adjusted, with lower priority content hidden in larger text sizes.
+
+## Installation
 
 Add the package to your project and target with apple's instructions on [adding package dependencies](https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app). The url of the package is https://github.com/dave-ruest/AdaptiveLayout . Then just add @AdaptiveLayout to any view that needs custom large screen behavior, and use the added **useTabletLayout** property to add that support.  
 
