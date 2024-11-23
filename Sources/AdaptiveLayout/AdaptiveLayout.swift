@@ -20,5 +20,5 @@
 /// "tablet" amount of space. Add a half screen grid view beside your navigation
 /// stack if you like, it's the same amount of work as the system split view, and
 /// will give your app a unique look. 
-@attached(member, names: named(widthClass), named(useTabletLayout))
+@attached(member, names: named(widthClass), named(heightClass), named(useTabletLayout), named(typeSize))
 public macro AdaptiveLayout() = #externalMacro(module: "AdaptiveLayoutMacros", type: "AdaptiveLayoutMacro")
